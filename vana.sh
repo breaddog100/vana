@@ -158,7 +158,7 @@ function uninstall_node() {
 function main_menu() {
 	while true; do
 	    clear
-	    echo "======================= wana 一键部署脚本======================="
+	    echo "======================= Vana 一键部署脚本======================="
 		echo "当前版本：$current_version"
 		echo "沟通电报群：https://t.me/lumaogogogo"
 		echo "推荐配置：1C8G50G"
