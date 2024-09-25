@@ -49,16 +49,17 @@ function install_node() {
     sudo apt install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python3-openssl git python3-poetry
 
     git clone https://github.com/vana-com/vana-dlp-chatgpt.git
-    cp $HOME/vana-dlp-chatgpt/.env.example $HOME/vana-dlp-chatgpt/.env
+    cd $HOME/vana-dlp-chatgpt/
+    cp .env.example .env
 
+    cd $HOME/
     curl https://pyenv.run | bash
-    echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> ~/.bashrc
-    echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
-    echo 'eval "$(pyenv init -)"' >> ~/.bashrc
-    echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bashrc
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-
-    source $HOME/.bashrc
+    echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> .bashrc
+    echo 'eval "$(pyenv init --path)"' >> .bashrc
+    echo 'eval "$(pyenv init -)"' >> .bashrc
+    echo 'eval "$(pyenv virtualenv-init -)"' >> .bashrc
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> .bashrc
+    source .bashrc
     pyenv install 3.11.4
 
     cd $HOME/vana-dlp-chatgpt
@@ -66,7 +67,16 @@ function install_node() {
     python --version
 
     sed -i '/\[tool.poetry.group.dev.dependencies\]/,/^$/ s/^[^#]/#&/' pyproject.toml
-    cd $HOME/vana-dlp-chatgpt
+
+    poetry env use $(pyenv which python)
+
+    cd $HOME
+    pyenv global 3.11.4
+    pip install --upgrade poetry
+    cd vana-dlp-chatgpt
+    rm poetry.lock
+    poetry lock
+
     poetry install
     pip install vana
 
@@ -89,13 +99,14 @@ function install_node() {
     node -v
 
     yarn install
-    cp $HOME/vana-dlp-smart-contracts/.env.example $HOME/vana-dlp-smart-contracts/.env
+    cp .env.example .env
 
+    cd $HOME/vana-dlp-chatgpt
     echo "钱包密码要用字母和数字，请保存coldkey和hotkey的相关信息："
-    $HOME/vana-dlp-chatgpt/vanacli wallet create --wallet.name $WALLET_NAME --wallet.hotkey $WALLET_NAME
+    ./vanacli wallet create --wallet.name $WALLET_NAME --wallet.hotkey $WALLET_NAME
     echo "下面是钱包对应私钥，请记录并保存，后续会用到："
-    $HOME/vana-dlp-chatgpt/vanacli wallet export_private_key
-    $HOME/vana-dlp-chatgpt/keygen.sh
+    ./vanacli wallet export_private_key
+    ./keygen.sh
 
     echo "部署完成..."
 }
