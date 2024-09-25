@@ -125,6 +125,7 @@ function contract_creation() {
     read -p "请输入DLP Token名称(如DLP-T-xxx): " DLP_TOKEN_NAME
     read -p "请输入DLP代码(如DLP-C-xxx): " DLP_TOKEN_SYMBOL
 
+    cd $HOME/vana-dlp-smart-contracts/
     sed -i 's/^DEPLOYER_PRIVATE_KEY=.*$/DEPLOYER_PRIVATE_KEY=$DEPLOYER_PRIVATE_KEY/' .env
     sed -i 's/^OWNER_ADDRESS=.*$/OWNER_ADDRESS=$OWNER_ADDRESS/' .env
     sed -i 's/^DLP_NAME=.*$/DLP_NAME=$DLP_NAME/' .env
