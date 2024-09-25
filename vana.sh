@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240925001
+current_version=20240925004
 
 update_script() {
     # 指定URL
