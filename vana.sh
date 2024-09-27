@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240928003
+current_version=20240928004
 
 update_script() {
     # 指定URL
@@ -53,8 +53,8 @@ function install_env() {
     echo 'eval "$(pyenv virtualenv-init -)"' >> .bashrc
     echo 'export PATH=$PATH:$HOME/.local/bin:$HOME/.pyenv/bin' >> .bashrc
     source .bashrc
-    $HOME/.pyenv/pyenv install 3.11.10
-    $HOME/.pyenv/pyenv local 3.11.10
+    $HOME/.pyenv/bin/pyenv install 3.11.10
+    $HOME/.pyenv/bin/pyenv local 3.11.10
     python --version
     pip install --upgrade pip
     pip install vana
