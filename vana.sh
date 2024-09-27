@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240927002
+current_version=20240927003
 
 update_script() {
     # 指定URL
-    update_url="https://raw.githubusercontent.com/breaddog100/wana/main/wana.sh"
+    update_url="https://raw.githubusercontent.com/breaddog100/vana/main/vana.sh"
     file_name=$(basename "$update_url")
 
     # 下载脚本文件
