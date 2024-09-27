@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240927001
+current_version=20240927002
 
 update_script() {
     # 指定URL
@@ -42,8 +42,6 @@ update_script() {
 
 # 部署环境
 function install_env() {
-
-    read -p "钱包名称: " WALLET_NAME
 
     sudo apt update
     sudo apt install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python3-openssl git python3-poetry
