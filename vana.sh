@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240927005
+current_version=20240928001
 
 update_script() {
     # 指定URL
@@ -48,11 +48,10 @@ function install_env() {
 
     # 安装Python
     curl https://pyenv.run | bash
-    echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> .bashrc
     echo 'eval "$(pyenv init --path)"' >> .bashrc
     echo 'eval "$(pyenv init -)"' >> .bashrc
     echo 'eval "$(pyenv virtualenv-init -)"' >> .bashrc
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> .bashrc
+    echo 'export PATH=$PATH:$HOME/.local/bin:$HOME/.pyenv/bin' >> .bashrc
     source .bashrc
     pyenv install 3.11.10
     pyenv local 3.11.10
