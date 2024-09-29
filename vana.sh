@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240929006
+current_version=20240929007
 
 update_script() {
     # 指定URL
@@ -166,6 +166,7 @@ function create_validator(){
             read -p "Hotkey钱包地址: " HOTKEY_ADDRESS
             OD_CHAIN_NETWORK=moksha
             OD_CHAIN_NETWORK_ENDPOINT=https://rpc.moksha.vana.org
+            read -p "去注册个 OpenAI API（https://platform.openai.com/api-keys）: " OPENAI_API_KEY
             read -p "DLP POOL 地址（上一步成功日志中的DataLiquidityPool地址）: " DLP_MOKSHA_CONTRACT
             read -p "DLP Token 地址（上一步成功日志中的DataLiquidityPoolToken地址）: " DLP_TOKEN_MOKSHA_CONTRACT
 
@@ -190,6 +191,7 @@ function create_validator(){
             echo "配置环境"
             # 修改.env文件
             sed -i "s/^OD_CHAIN_NETWORK=.*$/OD_CHAIN_NETWORK=$OD_CHAIN_NETWORK/" .env
+            sed -i "s/^OPENAI_API_KEY=.*$/OPENAI_API_KEY=$OPENAI_API_KEY/" .env
             sed -i "s|^OD_CHAIN_NETWORK_ENDPOINT=.*$|OD_CHAIN_NETWORK_ENDPOINT=$OD_CHAIN_NETWORK_ENDPOINT|" .env
             sed -i "s/^DLP_MOKSHA_CONTRACT=.*$/DLP_MOKSHA_CONTRACT=$DLP_MOKSHA_CONTRACT/" .env
             sed -i "s/^DLP_TOKEN_MOKSHA_CONTRACT=.*$/DLP_TOKEN_MOKSHA_CONTRACT=$DLP_TOKEN_MOKSHA_CONTRACT/" .env
