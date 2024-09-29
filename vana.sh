@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240929007
+current_version=20240929008
 
 update_script() {
     # 指定URL
@@ -238,13 +238,13 @@ function view_logs(){
 # 停止节点
 function stop_node(){
 	sudo systemctl stop vana-validator
-	echo "quil 节点已停止"
+	echo "vana validator 已停止"
 }
 
 # 启动节点
 function start_node(){
 	sudo systemctl start vana-validator
-	echo "quil 节点已启动"
+	echo "vana validator 已启动"
 }
 
 # 卸载节点
