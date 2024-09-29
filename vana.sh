@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240928005
+current_version=20240929001
 
 update_script() {
     # 指定URL
@@ -141,15 +141,27 @@ function contract_creation() {
 # 创建验证者
 function create_validator(){
 
+    cd $HOME/vana-dlp-chatgpt/
+    source vana_gpt_env/bin/activate
+
     read -p "Hotkey钱包地址: " HOTKEY_ADDRESS
     OD_CHAIN_NETWORK=moksha
     OD_CHAIN_NETWORK_ENDPOINT=https://rpc.moksha.vana.org
-    read -p "请输入coldkey钱包私钥: " OPENAI_API_KEY
-    read -p "请输入coldkey钱包地址: " DLP_MOKSHA_CONTRACT
-    read -p "请输入DLP名称(如DLP-xxx): " DLP_TOKEN_MOKSHA_CONTRACT
+    read -p "DLP POOL 地址（上一步成功日志中的DataLiquidityPool地址）: " DLP_MOKSHA_CONTRACT
+    read -p "DLP Token 地址（上一步成功日志中的DataLiquidityPoolToken地址）: " DLP_TOKEN_MOKSHA_CONTRACT
 
-    cd $HOME/vana-dlp-chatgpt/
-    source vana_gpt_env/bin/activate
+    # 定义文件路径
+    FILE_PATH="$HOME/vana-dlp-chatgpt/public_key_base64.asc"
+
+    # 判断文件是否存在
+    if [ -f "$FILE_PATH" ]; then
+        # 文件存在，读取内容并赋值给变量
+        PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=$(cat "$FILE_PATH")
+    else
+        # 文件不存在，进入指定目录并运行命令
+        ./keygen.sh
+        PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=$(cat "$FILE_PATH")
+    fi
 
     echo "质押代币，确认钱包有水"
     # 质押代币
@@ -159,12 +171,34 @@ function create_validator(){
     # 修改.env文件
     sed -i "s/^OD_CHAIN_NETWORK=.*$/OD_CHAIN_NETWORK=$OD_CHAIN_NETWORK/" .env
     sed -i "s/^OD_CHAIN_NETWORK_ENDPOINT=.*$/OD_CHAIN_NETWORK_ENDPOINT=$OD_CHAIN_NETWORK_ENDPOINT/" .env
-    sed -i "s/^OPENAI_API_KEY=.*$/OPENAI_API_KEY=$OPENAI_API_KEY/" .env
     sed -i "s/^DLP_MOKSHA_CONTRACT=.*$/DLP_MOKSHA_CONTRACT=$DLP_MOKSHA_CONTRACT/" .env
     sed -i "s/^DLP_TOKEN_MOKSHA_CONTRACT=.*$/DLP_TOKEN_MOKSHA_CONTRACT=$DLP_TOKEN_MOKSHA_CONTRACT/" .env
+    sed -i "s/^PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=.*$/PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=$PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64/" .env
 
     # 运行验证者
-    poetry run python -m chatgpt.nodes.validator
+    sudo tee /etc/systemd/system/vana-validator.service > /dev/null <<EOF
+[Unit]
+Description=Vana Validator Service
+After=network.target
+
+[Service]
+User=$USER
+WorkingDirectory=$HOME/vana-dlp-chatgpt
+Environment="PATH=$HOME/vana-dlp-chatgpt/vana_gpt_env/bin"
+Environment="PYTHONPATH=$HOME/vana-dlp-chatgpt"
+ExecStart=$HOME/.local/bin/poetry run python -m chatgpt.nodes.validator
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    sudo systemctl daemon-reload
+    sudo systemctl enable vana-validator
+    sudo systemctl start vana-validator
+
+    #poetry run python -m chatgpt.nodes.validator
 }
 
 # 卸载节点
