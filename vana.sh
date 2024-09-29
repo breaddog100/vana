@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240929004
+current_version=20240929005
 
 update_script() {
     # 指定URL
@@ -47,28 +47,36 @@ function install_env() {
     sudo apt upgrade -y
     sudo apt install -y curl wget jq make gcc nano git software-properties-common
 
-    # 安装Python
-    sudo add-apt-repository ppa:deadsnakes/ppa -y
-    sudo apt update
-    sudo apt install -y python3.11 python3.11-venv python3.11-dev python3-pip
-    
-    curl -sSL https://install.python-poetry.org | python3 -
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> $HOME/.bash_profile
-    source $HOME/.bash_profile
-    python3.11 --version
+    # 安装 nvm
+    if [ ! -d "$HOME/.nvm" ]; then
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+    fi
 
-    # 安装node
-    # curl -fsSL https://deb.nodesource.com/setup_18.x | sudo bash -
-    # sudo apt-get install -y nodejs
-    # sudo apt-get install -y npm
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
-    source ~/.bashrc
+    # 加载 nvm
+    export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+    # 安装 Node.js 和 npm
     nvm install 18
+    nvm use 18
 
     node -v
     npm -v
 
-    # clone GPT 代码
+    # 安装 Python
+    sudo add-apt-repository ppa:deadsnakes/ppa -y
+    sudo apt update
+    sudo apt install -y python3.11 python3.11-venv python3.11-dev python3-pip
+
+    curl -sSL https://install.python-poetry.org | python3 -
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> $HOME/.bashrc
+    source $HOME/.bashrc
+    python3.11 --version
+
+    # 安装 Yarn
+    npm install -g yarn
+
+    # Clone GPT 代码
     git clone https://github.com/vana-com/vana-dlp-chatgpt.git
     cd $HOME/vana-dlp-chatgpt/
     cp .env.example .env
@@ -76,15 +84,15 @@ function install_env() {
     # 配置环境
     python3.11 -m venv vana_gpt_env
     source vana_gpt_env/bin/activate
+    pip install --upgrade pip
     pip install poetry
     poetry install
     pip install vana
 
-    # clone 合约代码
+    # Clone 合约代码
     cd $HOME
     git clone https://github.com/Josephtran102/vana-dlp-smart-contracts
     cd vana-dlp-smart-contracts
-    sudo npm install -g yarn
     yarn install
     cp .env.example .env
 
