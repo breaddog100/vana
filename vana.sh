@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240929001
+current_version=20240929004
 
 update_script() {
     # 指定URL
@@ -58,9 +58,13 @@ function install_env() {
     python3.11 --version
 
     # 安装node
-    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo bash -
-    sudo apt-get install -y nodejs
-    sudo apt-get install -y npm
+    # curl -fsSL https://deb.nodesource.com/setup_18.x | sudo bash -
+    # sudo apt-get install -y nodejs
+    # sudo apt-get install -y npm
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+    source ~/.bashrc
+    nvm install 18
+
     node -v
     npm -v
 
@@ -168,6 +172,7 @@ function create_validator(){
     vanacli dlp register_validator --stake_amount 10
     vanacli dlp approve_validator --validator_address="$HOTKEY_ADDRESS"
 
+    echo "配置环境"
     # 修改.env文件
     sed -i "s/^OD_CHAIN_NETWORK=.*$/OD_CHAIN_NETWORK=$OD_CHAIN_NETWORK/" .env
     sed -i "s/^OD_CHAIN_NETWORK_ENDPOINT=.*$/OD_CHAIN_NETWORK_ENDPOINT=$OD_CHAIN_NETWORK_ENDPOINT/" .env
@@ -194,6 +199,7 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 
+    echo "启动服务..."
     sudo systemctl daemon-reload
     sudo systemctl enable vana-validator
     sudo systemctl start vana-validator
@@ -224,7 +230,7 @@ function main_menu() {
         echo "======================= Vana 一键部署脚本======================="
         echo "当前版本：$current_version"
         echo "沟通电报群：https://t.me/lumaogogogo"
-        echo "推荐配置：1C8G50G"
+        echo "推荐配置：2C8G50G"
         echo "请选择要执行的操作:"
         echo "1. 部署环境 install_env"
         echo "2. 创建钱包 create_wallet"
