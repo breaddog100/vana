@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240930001
+current_version=20240930002
 
 update_script() {
     # 指定URL
@@ -153,56 +153,53 @@ function contract_creation() {
 
 # 创建验证者
 function create_validator(){
+    echo "部署验证者之前要先注册Openai 的 API 接口，没错，是chatgpt的接口，需要先去申请。"
+    echo "开始部署验证者..."
+    cd $HOME/vana-dlp-chatgpt/
+    source vana_gpt_env/bin/activate
 
-    echo "有兄弟部署后会出现无法调用合约的错误，目前我在解决，如果你解决了也感谢能指教一下，可以在电报群里找到我"
-    echo "另外部署验证者之前要先注册Openai 的 API 接口，没错，是chatgpt的接口，需要先去申请。"
-    read -r -p "确认开始部署[Y/N]: " response
-    case "$response" in
-        [yY][eE][sS]|[yY]) 
-            echo "开始部署验证者..."
-            cd $HOME/vana-dlp-chatgpt/
-            source vana_gpt_env/bin/activate
+    read -p "Hotkey钱包地址: " HOTKEY_ADDRESS
+    OD_CHAIN_NETWORK=moksha
+    OD_CHAIN_NETWORK_ENDPOINT=https://rpc.moksha.vana.org
+    read -p "去注册个 OpenAI API（https://platform.openai.com/api-keys）: " OPENAI_API_KEY
+    read -p "DLP POOL 地址（上一步成功日志中的DataLiquidityPool地址）: " DLP_MOKSHA_CONTRACT
+    read -p "DLP Token 地址（上一步成功日志中的DataLiquidityPoolToken地址）: " DLP_TOKEN_MOKSHA_CONTRACT
 
-            read -p "Hotkey钱包地址: " HOTKEY_ADDRESS
-            OD_CHAIN_NETWORK=moksha
-            OD_CHAIN_NETWORK_ENDPOINT=https://rpc.moksha.vana.org
-            read -p "去注册个 OpenAI API（https://platform.openai.com/api-keys）: " OPENAI_API_KEY
-            read -p "DLP POOL 地址（上一步成功日志中的DataLiquidityPool地址）: " DLP_MOKSHA_CONTRACT
-            read -p "DLP Token 地址（上一步成功日志中的DataLiquidityPoolToken地址）: " DLP_TOKEN_MOKSHA_CONTRACT
+    # 定义文件路径
+    FILE_PATH="$HOME/vana-dlp-chatgpt/public_key_base64.asc"
 
-            # 定义文件路径
-            FILE_PATH="$HOME/vana-dlp-chatgpt/public_key_base64.asc"
+    # 判断文件是否存在
+    if [ -f "$FILE_PATH" ]; then
+        # 文件存在，读取内容并赋值给变量
+        PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=$(cat "$FILE_PATH")
+    else
+        # 文件不存在，进入指定目录并运行命令
+        ./keygen.sh
+        PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=$(cat "$FILE_PATH")
+    fi
 
-            # 判断文件是否存在
-            if [ -f "$FILE_PATH" ]; then
-                # 文件存在，读取内容并赋值给变量
-                PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=$(cat "$FILE_PATH")
-            else
-                # 文件不存在，进入指定目录并运行命令
-                ./keygen.sh
-                PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=$(cat "$FILE_PATH")
-            fi
+    echo "质押代币，确认钱包有水"
+    # 质押代币
+    vanacli dlp register_validator --stake_amount 10
+    vanacli dlp approve_validator --validator_address="$HOTKEY_ADDRESS"
 
-            echo "质押代币，确认钱包有水"
-            # 质押代币
-            vanacli dlp register_validator --stake_amount 10
-            vanacli dlp approve_validator --validator_address="$HOTKEY_ADDRESS"
+    echo "配置环境"
+    # 修改.env文件
+    sed -i '/DLP_CONTRACT_ADDRESS/d' .env
+    sed -i '/DLP_SATORI_CONTRACT/d' .env
+    sed -i '/DLP_TOKEN_VANA_CONTRACT/d' .env
+    sed -i '/DLP_TOKEN_SATORI_CONTRACT/d' .env
+    sed -i "s/^OD_CHAIN_NETWORK=.*$/OD_CHAIN_NETWORK=$OD_CHAIN_NETWORK/" .env
+    sed -i "s/^OPENAI_API_KEY=.*/OPENAI_API_KEY=\"$OPENAI_API_KEY\"/" .env 
+    sed -i "s|^OD_CHAIN_NETWORK_ENDPOINT=.*$|OD_CHAIN_NETWORK_ENDPOINT=$OD_CHAIN_NETWORK_ENDPOINT|" .env
+    sed -i "s/^DLP_MOKSHA_CONTRACT=.*$/DLP_MOKSHA_CONTRACT=$DLP_MOKSHA_CONTRACT/" .env
+    sed -i "s/^DLP_TOKEN_MOKSHA_CONTRACT=.*$/DLP_TOKEN_MOKSHA_CONTRACT=$DLP_TOKEN_MOKSHA_CONTRACT/" .env
+    sed -i "s/^PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=.*/PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=\"$PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64\"/" .env
 
-            echo "配置环境"
-            # 修改.env文件
-            sed -i '/DLP_CONTRACT_ADDRESS/d' .env
-            sed -i '/DLP_SATORI_CONTRACT/d' .env
-            sed -i '/DLP_TOKEN_VANA_CONTRACT/d' .env
-            sed -i '/DLP_TOKEN_SATORI_CONTRACT/d' .env
-            sed -i "s/^OD_CHAIN_NETWORK=.*$/OD_CHAIN_NETWORK=$OD_CHAIN_NETWORK/" .env
-            sed -i "s/^OPENAI_API_KEY=.*/OPENAI_API_KEY=\"$OPENAI_API_KEY\"/" .env 
-            sed -i "s|^OD_CHAIN_NETWORK_ENDPOINT=.*$|OD_CHAIN_NETWORK_ENDPOINT=$OD_CHAIN_NETWORK_ENDPOINT|" .env
-            sed -i "s/^DLP_MOKSHA_CONTRACT=.*$/DLP_MOKSHA_CONTRACT=$DLP_MOKSHA_CONTRACT/" .env
-            sed -i "s/^DLP_TOKEN_MOKSHA_CONTRACT=.*$/DLP_TOKEN_MOKSHA_CONTRACT=$DLP_TOKEN_MOKSHA_CONTRACT/" .env
-            sed -i "s/^PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=.*/PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=\"$PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64\"/" .env
+    #poetry run python -m chatgpt.nodes.validator
 
-            # 运行验证者
-            sudo tee /etc/systemd/system/vana-validator.service > /dev/null <<EOF
+    # 运行验证者
+    sudo tee /etc/systemd/system/vana-validator.service > /dev/null <<EOF
 [Unit]
 Description=Vana Validator Service
 After=network.target
@@ -210,9 +207,8 @@ After=network.target
 [Service]
 User=$USER
 WorkingDirectory=$HOME/vana-dlp-chatgpt
-Environment="PATH=$HOME/vana-dlp-chatgpt/vana_gpt_env/bin"
-Environment="PYTHONPATH=$HOME/vana-dlp-chatgpt"
-ExecStart=$HOME/.local/bin/poetry run python -m chatgpt.nodes.validator
+ExecStart=/bin/bash -c 'source $HOME/vana-dlp-chatgpt/vana_gpt_env/bin/activate && poetry run python -m chatgpt.nodes.validator'
+Restart=always
 Restart=always
 RestartSec=10
 
@@ -220,17 +216,11 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 
-            sudo systemctl daemon-reload
-            sudo systemctl enable vana-validator
-            sudo systemctl start vana-validator
+    sudo systemctl daemon-reload
+    sudo systemctl enable vana-validator
+    sudo systemctl start vana-validator
 
-            #poetry run python -m chatgpt.nodes.validator
-            echo "验证者部署完成。"
-            ;;
-        *)
-            echo "好的，等等再说吧。"
-            ;;
-    esac
+    echo "验证者部署完成。"
 
 }
 
