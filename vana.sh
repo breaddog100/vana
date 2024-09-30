@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240929008
+current_version=20240930001
 
 update_script() {
     # 指定URL
@@ -111,7 +111,7 @@ function create_wallet(){
     echo "程序会分别生成Coldkey（质押使用）和Hotkey（节点提交分数使用）两个钱包。使用默认名称为default即可"
     echo "密码要用字母和数字，请保存coldkey和hotkey的所有信息，除了密码部分需要输入，其他直接回车即可。"
     vanacli wallet create --wallet.name $WALLET_NAME --wallet.hotkey $WALLET_NAME
-
+    
     echo "下面会分别导出2个钱包的私钥，名称使用默认default（回车即可），第一次导出coldkey（回车即可），第二次"
     echo "导出hotkey，在第二次选择时切记输入hotkey。将秘钥导入狐狸钱包后使用地址领水。"
     # 导出cold key私钥
@@ -190,12 +190,16 @@ function create_validator(){
 
             echo "配置环境"
             # 修改.env文件
+            sed -i '/DLP_CONTRACT_ADDRESS/d' .env
+            sed -i '/DLP_SATORI_CONTRACT/d' .env
+            sed -i '/DLP_TOKEN_VANA_CONTRACT/d' .env
+            sed -i '/DLP_TOKEN_SATORI_CONTRACT/d' .env
             sed -i "s/^OD_CHAIN_NETWORK=.*$/OD_CHAIN_NETWORK=$OD_CHAIN_NETWORK/" .env
-            sed -i "s/^OPENAI_API_KEY=.*$/OPENAI_API_KEY=$OPENAI_API_KEY/" .env
+            sed -i "s/^OPENAI_API_KEY=.*/OPENAI_API_KEY=\"$OPENAI_API_KEY\"/" .env 
             sed -i "s|^OD_CHAIN_NETWORK_ENDPOINT=.*$|OD_CHAIN_NETWORK_ENDPOINT=$OD_CHAIN_NETWORK_ENDPOINT|" .env
             sed -i "s/^DLP_MOKSHA_CONTRACT=.*$/DLP_MOKSHA_CONTRACT=$DLP_MOKSHA_CONTRACT/" .env
             sed -i "s/^DLP_TOKEN_MOKSHA_CONTRACT=.*$/DLP_TOKEN_MOKSHA_CONTRACT=$DLP_TOKEN_MOKSHA_CONTRACT/" .env
-            sed -i "s/^PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=.*$/PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=$PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64/" .env
+            sed -i "s/^PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=.*/PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=\"$PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64\"/" .env
 
             # 运行验证者
             sudo tee /etc/systemd/system/vana-validator.service > /dev/null <<EOF
