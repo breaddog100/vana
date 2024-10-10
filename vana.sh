@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20240930002
+current_version=20241010001
 
 update_script() {
     # 指定URL
@@ -151,6 +151,15 @@ function contract_creation() {
 
 }
 
+# 质押代币
+function staking_token(){
+    echo "质押代币，确认钱包有水"
+    read -p "Hotkey钱包地址: " HOTKEY_ADDRESS
+    # 质押代币
+    vanacli dlp register_validator --stake_amount 10
+    vanacli dlp approve_validator --validator_address="$HOTKEY_ADDRESS"
+}
+
 # 创建验证者
 function create_validator(){
     echo "部署验证者之前要先注册Openai 的 API 接口，没错，是chatgpt的接口，需要先去申请。"
@@ -158,7 +167,6 @@ function create_validator(){
     cd $HOME/vana-dlp-chatgpt/
     source vana_gpt_env/bin/activate
 
-    read -p "Hotkey钱包地址: " HOTKEY_ADDRESS
     OD_CHAIN_NETWORK=moksha
     OD_CHAIN_NETWORK_ENDPOINT=https://rpc.moksha.vana.org
     read -p "去注册个 OpenAI API（https://platform.openai.com/api-keys）: " OPENAI_API_KEY
@@ -177,11 +185,6 @@ function create_validator(){
         ./keygen.sh
         PRIVATE_FILE_ENCRYPTION_PUBLIC_KEY_BASE64=$(cat "$FILE_PATH")
     fi
-
-    echo "质押代币，确认钱包有水"
-    # 质押代币
-    vanacli dlp register_validator --stake_amount 10
-    vanacli dlp approve_validator --validator_address="$HOTKEY_ADDRESS"
 
     echo "配置环境"
     # 修改.env文件
@@ -269,10 +272,11 @@ function main_menu() {
         echo "1. 部署环境 install_env"
         echo "2. 创建钱包 create_wallet"
         echo "3. 部署合约 contract_creation"
-        echo "4. 创建验证者 create_validator"
-        echo "5. 验证者日志 view_logs"
-        echo "6. 停止验证者 stop_node"
-        echo "7. 启动验证者 start_node"
+        echo "4. 质押代币 staking_token"
+        echo "5. 创建验证者 create_validator"
+        echo "6. 验证者日志 view_logs"
+        echo "7. 停止验证者 stop_node"
+        echo "8. 启动验证者 start_node"
         echo "1618. 卸载节点 uninstall_node"
         echo "0. 退出脚本 exit"
         read -p "请输入选项: " OPTION
@@ -281,10 +285,11 @@ function main_menu() {
         1) install_env ;;
         2) create_wallet ;;
         3) contract_creation ;;
-        4) create_validator ;;
-        5) view_logs ;;
-        6) stop_node ;;
-        7) start_node ;;
+        4) staking_token ;;
+        5) create_validator ;;
+        6) view_logs ;;
+        7) stop_node ;;
+        8) start_node ;;
         1618) uninstall_node ;;
         0) echo "退出脚本。"; exit 0 ;;
         *) echo "无效选项，请重新输入。"; sleep 3 ;;
