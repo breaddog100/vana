@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20241011001
+current_version=20241011002
 
 update_script() {
     # 指定URL
@@ -155,7 +155,7 @@ function contract_creation() {
 function staking_token(){
     cd $HOME/vana-dlp-chatgpt/
     source vana_gpt_env/bin/activate
-    echo "质押代币，确认钱包有水"
+    echo "先将新发的代币从coldkey转到hotkey，然后确保hotkey中有vana，在进行质押。"
     read -p "Hotkey钱包地址: " HOTKEY_ADDRESS
     # 质押代币
     vanacli dlp register_validator --stake_amount 10
